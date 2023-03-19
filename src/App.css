@@ -1,38 +1,325 @@
-.App {
-  text-align: center;
+.main{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+}
+/* .main.label{
+    background-color: red;
+} */
+.Header{
+    background-color: brown;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+}
+.Logo{
+    display: flex;
+    padding: 0 2rem;
+}
+.Logo-header{
+    display: inline-block;
+    width: 70px;
+    height: 70px;
+    padding: 8px;
+    margin: 0 0 0 24px;
+    border-radius:50%;
+}
+.Name-header{
+    padding: 8px;
+    margin: 0 24px 0 0;
+    font-size: 3rem;
+}
+.Name-header:hover, .Logo-header:hover{
+    color: white;
+    cursor: pointer;
+}
+.navbar-links>ul{
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.navbar-links>ul>li>a{
+    text-decoration: none;
+    font-size: 1.5rem;
+    padding: 0 24px;
+    line-height: 80px;
+    color: black;
+    font-weight: 800;
+}
+.navbar-links li:hover{
+    color: white;
+    background-color: red;
+    opacity: 0.8;
+    transition: 1s;
+}
+.navbar-links>a{
+    margin : 0 12px;
+    text-decoration: none;
+    color: black;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+
+
+.Body{
+    width: 100%;
+    height: 1000px;
+    position: relative;
+}
+.btn-show{
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+}
+.video-camera {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+}
+.show{
+    display: block;
+    opacity: 1;
+    transition: visibility 0s linear 0.33s, opacity 0.9s linear;
+}
+.hide{
+    opacity: 0;
+    transition: visibility 0s linear 0.33s, opacity 0.33s linear;
+}
+.video{
+    margin-top: 50px;
+    width: 760px;
+    height: 520px;
+}
+.controls{
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+.btn{
+    padding: 4px 16px;
+    margin: 0px 6px;
+    font-size: 1.4rem;
+    background: transparent;
+    background-color: black;
+    color: white;
+    font-weight: bold;
+    border: 2px solid white;
+    border-radius: 6px; 
+} 
+.btn:hover{
+    color: white;
+    background-color: purple;
+    cursor: pointer;
+}
+.output-data{
+    margin-top: 20px;
+    display: flex;
+    justify-content: center ;
+}
+.output-textbox{
+    padding: 10px;
+    font-size: 1.4rem;
+    width: 400px;
+}
+.volume-data{
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    font-size: 50px;
+}
+.volume-data .volume-icon:hover{
+    cursor: pointer;
+    background-color: black;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 6px;
+    transition: .2s;
+}
+@media (min-height: 1080px) {
+    .Body{
+        position: static;
+    }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+footer {
+    position: relative;
+    bottom: 0;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+@media (max-height:400px) {
+    footer {
+        position: static;
+    }
+    .Header {
+        padding-top: 40px;
+    }
+    .video{
+        max-width: 380px;
+        max-height: 340px;
+    }
 }
 
-.App-link {
-  color: #61dafb;
+.footer-distributed {
+    background-color: brown;
+    box-sizing: border-box;
+    width: 100%;
+    text-align: left;
+    font: bold 16px sans-serif;
+    padding: 50px 50px 60px 50px;
+    margin-top: 80px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.footer-distributed .footer-left, .footer-distributed .footer-center, .footer-distributed .footer-right {
+    display: inline-block;
+    vertical-align: top;
 }
+
+/* Footer left */
+
+.footer-distributed .footer-left {
+    width: 30%;
+}
+
+.footer-distributed h3 {
+    color: #ffffff;
+    font: normal 36px 'Cookie', cursive;
+    margin: 0;
+}
+
+
+.footer-distributed h3 span {
+    color: #e0ac1c;
+}
+
+/* Footer links */
+
+.footer-distributed .footer-links {
+    color: #ffffff;
+    margin: 20px 0 12px;
+}
+
+.footer-distributed .footer-links a {
+    display: inline-block;
+    line-height: 1.8;
+    text-decoration: none;
+    color: inherit;
+}
+
+.footer-distributed .footer-company-name {
+    color: #8f9296;
+    font-size: 14px;
+    font-weight: normal;
+    margin: 0;
+}
+
+/* Footer Center */
+
+.footer-distributed .footer-center {
+    width: 35%;
+}
+
+.footer-distributed .footer-center i {
+    background-color: #33383b;
+    color: #ffffff;
+    font-size: 25px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 42px;
+    margin: 10px 15px;
+    vertical-align: middle;
+}
+
+.footer-distributed .footer-center i.fa-envelope {
+    font-size: 17px;
+    line-height: 38px;
+}
+
+.footer-distributed .footer-center p {
+    display: inline-block;
+    color: #ffffff;
+    vertical-align: middle;
+    margin: 0;
+}
+
+.footer-distributed .footer-center p span {
+    display: block;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 2;
+}
+
+.footer-distributed .footer-center p a {
+    color: yellow;
+    text-decoration: none;
+    ;
+}
+
+/* Footer Right */
+
+.footer-distributed .footer-right {
+    width: 30%;
+}
+
+.footer-distributed .footer-company-about {
+    line-height: 20px;
+    color: #92999f;
+    font-size: 13px;
+    font-weight: normal;
+    margin: 0;
+}
+
+.footer-distributed .footer-company-about span {
+    display: block;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.footer-distributed .footer-icons {
+    margin-top: 25px;
+}
+
+.footer-distributed .footer-icons a {
+    display: inline-block;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    background-color: #33383b;
+    border-radius: 2px;
+    font-size: 20px;
+    color: #ffffff;
+    text-align: center;
+    line-height: 35px;
+    margin-right: 3px;
+    margin-bottom: 5px;
+}
+
+.footer-distributed .footer-icons a:hover {
+    background-color: #3F71EA;
+}
+
+.footer-links a:hover {
+    color: #3F71EA;
+}
+
+@media (max-width: 880px) {
+    .footer-distributed .footer-left, .footer-distributed .footer-center, .footer-distributed .footer-right {
+        display: block;
+        width: 100%;
+        margin-bottom: 40px;
+        text-align: center;
+    }
+    .footer-distributed .footer-center i {
+        margin-left: 0;
+    }
+
+}       
