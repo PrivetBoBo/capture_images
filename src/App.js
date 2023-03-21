@@ -15,16 +15,14 @@ import * as mobilenet from '@tensorflow-models/mobilenet';
 // const TrainingData = 50;
 // const LABEL_CONFIDENCE = 0.8;
 function App() {
-  const navRef = useRef();
-  const showNavbar = () => {
-    navRef.current.classList.toggle('responsive-nav');
-  }
+ 
 
   const [state, setState] = useState(false);
 
   // const toggle = () =>{
   //   setState(!state);
   // }
+  const urlRef = useState();
   const photoRef = useRef();
   const videoRef = useRef();
   const predictionList = document.querySelector('#prediction-list');
@@ -119,17 +117,21 @@ function App() {
   
   const takePicture = async () => {
     const width = 840;
-    const height = width / (16/9);
+    const height = width / (16/10);
 
     let video = videoRef.current;
     let photo = photoRef.current;
+    let url = urlRef.current;
     photo.width = width;
     photo.height = height;
 
     let ctx = photo.getContext('2d');
     ctx.drawImage(video,0,0,photo.width,photo.height);
-    // let dataPhoto = photo.canvas.toDataURL('image/png',1.0);
-    // console.log(dataPhoto);
+    
+
+    let photoUrl = photo.toDataURL('image/png',100);
+    url = photoUrl;
+    console.log(photo);
   };
 
   //clear image 
@@ -200,7 +202,7 @@ function App() {
          <img className="Logo-header" alt='Logo' src={logo} />
          <h1 className="Name-header">Smile</h1>
         </div>
-        <div className='navbar-links' ref={navRef}>
+        <div className='navbar-links' >
           <ul>
             <li><a href='#'>Trang chủ</a></li>
             <li><a href='#'>Thông tin</a></li>
@@ -240,7 +242,7 @@ function App() {
           <div className="volume-data">
             <i className='volume-icon'onClick={() => {audio(soundSrc)}}><FaVolumeUp/></i>
           </div>
-          <div ref={photoRef}></div>
+          <canvas ref={photoRef} src={urlRef}></canvas>
           <div class="section prediction">
           <ol class="prediction-list" id="prediction-list"></ol>
       </div>
