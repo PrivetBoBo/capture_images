@@ -1,17 +1,19 @@
-import React, {useEffect, useRef, useState} from 'react';
-import * as tf from '@tensorflow/tfjs';
-import * as mobilenet from '@tensorflow-models/mobilenet';
-import * as knnClassifier from '@tensorflow-models/knn-classifier';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import './App.css';
-import { initNotifications, notify } from '@mycv/f8-notification';
-import { FaVolumeUp, FaBars, FaFacebook, FaTwitter, FaYoutube, FaGithub } from "react-icons/fa";
-import {soundURL} from 'howler'
+import { initNotifications } from '@mycv/f8-notification';
+import { FaVolumeUp, FaFacebook, FaTwitter, FaYoutube, FaGithub } from "react-icons/fa";
+import  modelDescription from './model-description';
+import {soundURL} from 'howler';
 import logo from './images/logo.png';
+import * as tf from "@tensorflow/tfjs";
+import Webcam from "react-webcam";
+import * as mobilenet from '@tensorflow-models/mobilenet';
+// import * as knnClassifier from '@tensorflow-models/knn-classifier';
 
-const NOT_LABEL = "not_label";
-const LABEL = "label";
-const TrainingData = 50;
-const LABEL_CONFIDENCE = 0.8;
+// const NOT_LABEL = "not_label";
+// const LABEL = "label";
+// const TrainingData = 50;
+// const LABEL_CONFIDENCE = 0.8;
 function App() {
   const navRef = useRef();
   const showNavbar = () => {
@@ -19,23 +21,24 @@ function App() {
   }
 
   const [state, setState] = useState(false);
-  const [Label, setLabel] = useState(false);
+
   // const toggle = () =>{
   //   setState(!state);
   // }
   const photoRef = useRef();
   const videoRef = useRef();
-  const classifier = useRef();
-  const mobilenetModule = useRef();
+  const predictionList = document.querySelector('#prediction-list');
+  // const classifier = useRef();
+  // const mobilenetModule = useRef();
 
   const init = async () =>{
     console.log('init....');
     await setUpCamera();
     console.log('init done');
 
-    classifier.current = knnClassifier.create();
+    // classifier.current = knnClassifier.create();
 
-    mobilenetModule.current = await mobilenet.load();
+    // mobilenetModule.current = await mobilenet.load();
     console.log("Set-up done");
   }
   
@@ -51,7 +54,6 @@ function App() {
             videoRef.current.addEventListener('loadeddata',resolve);
           },
           error => {reject(error);}
-
         );
       }else{
         reject(new Error('getUserMedia not supported'));
@@ -59,19 +61,20 @@ function App() {
     })
   }
 
-  const sleep = (ms = 0) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
 
-  const train = async label => {
-    console.log('training....');
-    console.log(`[${label}] is training...`);
-    for(let i=0 ; i<TrainingData ; ++i){
-      console.log(`Progress ${ (i + 1) / TrainingData * 100}%`);
-      await sleep(100);
-      training(label);
-    }
-  }
+  // const sleep = (ms = 0) => {
+  //   return new Promise(resolve => setTimeout(resolve, ms));
+  // }
+
+  // const train = async label => {
+  //   console.log('training....');
+  //   console.log(`[${label}] is training...`);
+  //   for(let i=0 ; i<TrainingData ; ++i){
+  //     console.log(`Progress ${ (i + 1) / TrainingData * 100}%`);
+  //     await sleep(100);
+  //     training(label);
+  //   }
+  // }
 
 /*
   Bước 1: train máy không có label
@@ -82,56 +85,105 @@ function App() {
   *@param {*} label
 */
 
-  const training = label => {
-     return new Promise(async resolve => {
-      const embedding = mobilenetModule.current.infer(
-        videoRef.current,
-        true
-      );
-      classifier.current.addExample(embedding, label);
-      resolve();
-    });
-  }
+  // const training = label => {
+  //    return new Promise(async resolve => {
+  //     const embedding = mobilenetModule.current.infer(
+  //       videoRef.current,
+  //       true
+  //     );
+  //     classifier.current.addExample(embedding, label);
+  //     resolve();
+  //   });
+  // }
 
-  const run = async () => {
-    const embedding = mobilenetModule.current.infer(
-      videoRef.current,
-      true
-    );
-    const result = await classifier.current.predictClass(embedding);
-    // console.log('Label: ', result.label);
-    // console.log('Confidences: ', result.confidences);
+  // const run = async () => {
+  //   const embedding = mobilenetModule.current.infer(
+  //     videoRef.current,
+  //     true
+  //   );
+  //   const result = await classifier.current.predictClass(embedding);
+  //   // console.log('Label: ', result.label);
+  //   // console.log('Confidences: ', result.confidences);
     
-    if (result.label === LABEL && result.confidences[result.label] > LABEL_CONFIDENCE) {
-      console.log('Label: ');
-        notify('Put your label', { body: 'You re aldready put your label on camera' });
-      setLabel(true);
-    }else{
-      console.log('Not label: ');
-      setLabel(false);
-    }
-    await sleep(200);
-    run();
+  //   if (result.label === LABEL && result.confidences[result.label] > LABEL_CONFIDENCE) {
+  //     console.log('Label: ');
+  //       notify('Put your label', { body: 'You re aldready put your label on camera' });
+  //     setLabel(true);
+  //   }else{
+  //     console.log('Not label: ');
+  //     setLabel(false);
+  //   }
+  //   await sleep(200);
+  //   run();
+  // };
+  
+  const takePicture = async () => {
+    const width = 840;
+    const height = width / (16/9);
+
+    let video = videoRef.current;
+    let photo = photoRef.current;
+    photo.width = width;
+    photo.height = height;
+
+    let ctx = photo.getContext('2d');
+    ctx.drawImage(video,0,0,photo.width,photo.height);
+    // let dataPhoto = photo.canvas.toDataURL('image/png',1.0);
+    // console.log(dataPhoto);
   };
 
-  const takePicture = async () => {
-    return new Promise((resolve) => {
-      let photo = photoRef.current;
-      let video = videoRef.current;
+  //clear image 
+  const clearImage = async () => {
+    let photo = photoRef.current;
+    let ctx = photo.getContext('2d');
+    ctx.clearRect(0,0,photo.width,photo.height);
+    console.log('clearImage working');
+    // setHasPhoto(false);
+  };
 
-      let width = 500;
-      let height = width / (16 / 9);
-      
-      //set the photo
-      photo.width = width;
-      photo.height = height;
+  const loadModel = async () => {
+    const model = await tf.loadLayersModel('./model/model.json');
+    return model;
+  };
+  
+  const loadedModel = loadModel();
 
-      let ctx = photo.getContext('2d');
-
-      ctx.putImageData(video);
-
+  const predict = async () => {
+    console.log('predict');
+    const model = await loadedModel;
+  
+    const offset = tf.scalar(127.5);
+    const tensor = tf.browser.fromPixels(photoRef)
+      .resizeNearestNeighbor([224, 224])
+      .toFloat()
+      .sub(offset)
+      .div(offset)
+      .expandDims();
+  
+    const prediction = await model.predict(tensor).data();
+  
+    const top5 = Array.from(prediction)
+      .map((prob, idx) => ({ probability: prob, name: modelDescription[idx] }))
+      .sort((a, b) => b.probability - a.probability)
+      .slice(0, 5);
+  
+    let elements = '';
+    top5.forEach(({ probability, name }) => {
+      const percent = Number(probability * 100).toFixed(2);
+      elements += `<li class="prediction-list-item"><span class="prediction-item-name">${name}</span> <span class="prediction-item-probability">${percent}%</span></li>`;
     });
-  }
+    predictionList.innerHTML = elements;
+
+  };
+  const soundSrc = '';
+  const audio = (src) => {
+    const sound = new soundURL({
+      src,
+      html5: true
+    });
+    sound.play();
+  };
+
 
   useEffect(() =>{
     init();
@@ -142,7 +194,7 @@ function App() {
     }
   },[]);
   return (
-    <div className={`main ${Label ? 'Label' : ''}`}>
+    <div className={`main `}>
       <div className="Header">
         <div className="Logo">
          <img className="Logo-header" alt='Logo' src={logo} />
@@ -167,26 +219,31 @@ function App() {
             {state ? "Tắt camera" : "Mở camera"}
           </button>
         </div>
-        <div className={`video-container ${state ? 'show' : 'hide'}`}>
-          <div className='video-camera'>
+        <div className={`webcam-container ${state ? 'show' : 'hide'}`}>
+          <div className='webcam-camera'>
             <video
               ref={videoRef}
-              className="video" 
+              className="webcam" 
               autoPlay
             />
           </div>  
           <div className="controls">
-            <button className="btn btn-train-one" onClick={() => {train(NOT_LABEL)}}>Train 1</button>
-            <button className="btn btn-train-one" onClick={() => {train(LABEL)}}>Train 2</button>
-            <button className="btn btn--run" onClick={() => {run()}}>Quét ảnh</button>
-            <button className="btn btn--takePicture" onClick={() => {takePicture()}}>Chụp ảnh</button>
+            {/* <button className="btn btn-train-one" onClick={() => {train(NOT_LABEL)}}>Train 1</button>
+            <button className="btn btn-train-one" onClick={() => {train(LABEL)}}>Train 2</button> */}
+            <button className="btn btn--run" onClick={() => {predict()}} >Quét ảnh</button>
+            <button className="btn btn--takePicture" onClick={() => {takePicture()}} >Chụp ảnh</button>
+            <button className="btn btn--takePicture" onClick={() => {clearImage()}} >Xóa ảnh</button>
           </div>
           <div className="output-data">
             <input type="text" className="output-textbox" placeholder="" disabled/>
           </div>
           <div className="volume-data">
-            <i className='volume-icon'><FaVolumeUp/></i>
+            <i className='volume-icon'onClick={() => {audio(soundSrc)}}><FaVolumeUp/></i>
           </div>
+          <div ref={photoRef}></div>
+          <div class="section prediction">
+          <ol class="prediction-list" id="prediction-list"></ol>
+      </div>
         </div>
       </div>
 
