@@ -1,42 +1,50 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState} from 'react';
 import './App.css';
-import { initNotifications } from '@mycv/f8-notification';
+// import { initNotifications } from '@mycv/f8-notification';
 import { FaVolumeUp, FaFacebook, FaTwitter, FaYoutube, FaGithub } from "react-icons/fa";
 import  modelDescription from './model-description';
 import {soundURL} from 'howler';
 import logo from './images/logo.png';
 import * as tf from "@tensorflow/tfjs";
-import Webcam from "react-webcam";
 import * as mobilenet from '@tensorflow-models/mobilenet';
-// import * as knnClassifier from '@tensorflow-models/knn-classifier';
+import * as knnClassifier from '@tensorflow-models/knn-classifier';
+import { useSpeechSynthesis } from 'react-speech-kit';
 
-// const NOT_LABEL = "not_label";
-// const LABEL = "label";
-// const TrainingData = 50;
-// const LABEL_CONFIDENCE = 0.8;
 function App() {
- 
-
   const [state, setState] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(false);
+  const [model, setModel] = useState(null);
+  const [results, setResults] = useState([]);
+  // const [text,setText] = useState('');
+  // const {speak} = useSpeechSynthesis();
+
+  // const handleOnClick = () => {
+  //   speak({text:text})
+  // }
+
 
   // const toggle = () =>{
   //   setState(!state);
   // }
-  const urlRef = useState();
+  const urlRef = useRef();
   const photoRef = useRef();
   const videoRef = useRef();
-  const predictionList = document.querySelector('#prediction-list');
-  // const classifier = useRef();
-  // const mobilenetModule = useRef();
+
+  const loadModel = async () => {
+    setIsModelLoading(true);
+    try{
+      const model = await mobilenet.load();
+      setModel(model);
+      setIsModelLoading(false);
+    }catch (error){
+      console.log("error");
+    }
+  }
+
 
   const init = async () =>{
     console.log('init....');
     await setUpCamera();
-    console.log('init done');
-
-    // classifier.current = knnClassifier.create();
-
-    // mobilenetModule.current = await mobilenet.load();
     console.log("Set-up done");
   }
   
@@ -58,65 +66,9 @@ function App() {
       }
     })
   }
-
-
-  // const sleep = (ms = 0) => {
-  //   return new Promise(resolve => setTimeout(resolve, ms));
-  // }
-
-  // const train = async label => {
-  //   console.log('training....');
-  //   console.log(`[${label}] is training...`);
-  //   for(let i=0 ; i<TrainingData ; ++i){
-  //     console.log(`Progress ${ (i + 1) / TrainingData * 100}%`);
-  //     await sleep(100);
-  //     training(label);
-  //   }
-  // }
-
-/*
-  Bước 1: train máy không có label
-  Bước 2: train máy có label
-  Bước 3: Lấy label hiện tại, analyst and compare data had been learned before
-  ==> Nếu là matching với data label => warning
-
-  *@param {*} label
-*/
-
-  // const training = label => {
-  //    return new Promise(async resolve => {
-  //     const embedding = mobilenetModule.current.infer(
-  //       videoRef.current,
-  //       true
-  //     );
-  //     classifier.current.addExample(embedding, label);
-  //     resolve();
-  //   });
-  // }
-
-  // const run = async () => {
-  //   const embedding = mobilenetModule.current.infer(
-  //     videoRef.current,
-  //     true
-  //   );
-  //   const result = await classifier.current.predictClass(embedding);
-  //   // console.log('Label: ', result.label);
-  //   // console.log('Confidences: ', result.confidences);
-    
-  //   if (result.label === LABEL && result.confidences[result.label] > LABEL_CONFIDENCE) {
-  //     console.log('Label: ');
-  //       notify('Put your label', { body: 'You re aldready put your label on camera' });
-  //     setLabel(true);
-  //   }else{
-  //     console.log('Not label: ');
-  //     setLabel(false);
-  //   }
-  //   await sleep(200);
-  //   run();
-  // };
   
   const takePicture = async () => {
-    const width = 840;
+    const width = 620;
     const height = width / (16/10);
 
     let video = videoRef.current;
@@ -127,11 +79,9 @@ function App() {
 
     let ctx = photo.getContext('2d');
     ctx.drawImage(video,0,0,photo.width,photo.height);
-    
-
-    let photoUrl = photo.toDataURL('image/png',100);
+    let photoUrl = photo.toDataURL('image/png',1.5);
     url = photoUrl;
-    console.log(photo);
+    // console.log(url);
   };
 
   //clear image 
@@ -142,41 +92,12 @@ function App() {
     console.log('clearImage working');
     // setHasPhoto(false);
   };
-
-  const loadModel = async () => {
-    const model = await tf.loadLayersModel('./model/model.json');
-    return model;
-  };
-  
-  const loadedModel = loadModel();
-
-  const predict = async () => {
-    console.log('predict');
-    const model = await loadedModel;
-  
-    const offset = tf.scalar(127.5);
-    const tensor = tf.browser.fromPixels(photoRef)
-      .resizeNearestNeighbor([224, 224])
-      .toFloat()
-      .sub(offset)
-      .div(offset)
-      .expandDims();
-  
-    const prediction = await model.predict(tensor).data();
-  
-    const top5 = Array.from(prediction)
-      .map((prob, idx) => ({ probability: prob, name: modelDescription[idx] }))
-      .sort((a, b) => b.probability - a.probability)
-      .slice(0, 5);
-  
-    let elements = '';
-    top5.forEach(({ probability, name }) => {
-      const percent = Number(probability * 100).toFixed(2);
-      elements += `<li class="prediction-list-item"><span class="prediction-item-name">${name}</span> <span class="prediction-item-probability">${percent}%</span></li>`;
-    });
-    predictionList.innerHTML = elements;
-
-  };
+  const identify = async () => {
+    // textInputRef.current.value = ''
+    const results = await model.classify(photoRef.current);
+    // console.log(results);
+    setResults(results);
+  }
   const soundSrc = '';
   const audio = (src) => {
     const sound = new soundURL({
@@ -189,12 +110,16 @@ function App() {
 
   useEffect(() =>{
     init();
-     initNotifications({cooldown: 3000});
+    loadModel();
     //clean-up
     return () =>{
-
     }
   },[]);
+  if (isModelLoading){
+    return <h2>Is Loading...</h2>
+  }
+  console.log(results);
+
   return (
     <div className={`main `}>
       <div className="Header">
@@ -209,10 +134,6 @@ function App() {
             <li><a href='#'>Liên hệ</a></li>
           </ul>
         </div>
-
-          {/* <button className='nav-btn' onClick={showNavbar}>
-            <FaBars/>
-          </button> */}
       </div>
 
       <div className="Body">
@@ -230,22 +151,33 @@ function App() {
             />
           </div>  
           <div className="controls">
-            {/* <button className="btn btn-train-one" onClick={() => {train(NOT_LABEL)}}>Train 1</button>
-            <button className="btn btn-train-one" onClick={() => {train(LABEL)}}>Train 2</button> */}
-            <button className="btn btn--run" onClick={() => {predict()}} >Quét ảnh</button>
+            <button className="btn btn--run" onClick={() => {identify()}} >Quét ảnh</button>
             <button className="btn btn--takePicture" onClick={() => {takePicture()}} >Chụp ảnh</button>
             <button className="btn btn--takePicture" onClick={() => {clearImage()}} >Xóa ảnh</button>
           </div>
-          <div className="output-data">
-            <input type="text" className="output-textbox" placeholder="" disabled/>
-          </div>
+          {results.length > 0 && <div className="output-data">
+          {results.map((result, index) => {
+                  return (
+                      <div className='result-output-data' key={result.className}>
+                        {index === 0 && <input type="text" className="output-textbox" placeholder="" value={result.className} disabled/>}
+                      </div>
+                 )
+                })}
+          </div>}
           <div className="volume-data">
-            <i className='volume-icon'onClick={() => {audio(soundSrc)}}><FaVolumeUp/></i>
+            <i className='volume-icon'onClick={() => {}}><FaVolumeUp/></i>
           </div>
           <canvas ref={photoRef} src={urlRef}></canvas>
-          <div class="section prediction">
-          <ol class="prediction-list" id="prediction-list"></ol>
-      </div>
+          {results.length > 0 && <div className='resultsHolder'>
+             {results.map((result, index) => {
+                  return (
+                     <div className='result' key={result.className}>
+                       <span className='name'>{result.className}</span>
+                       <span className='confidence'>Confidence level: {(result.probability * 100).toFixed(2)}% {index === 0 && <span className='bestGuess'>Best Guess</span>}</span>
+                      </div>
+                 )
+                })}
+           </div>}
         </div>
       </div>
 
