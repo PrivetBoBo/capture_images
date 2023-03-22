@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState} from 'react';
 import './App.css';
-// import { initNotifications } from '@mycv/f8-notification';
 import { FaVolumeUp, FaFacebook, FaTwitter, FaYoutube, FaGithub } from "react-icons/fa";
 import  modelDescription from './model-description';
-import {soundURL} from 'howler';
 import logo from './images/logo.png';
 import * as tf from "@tensorflow/tfjs";
 import * as mobilenet from '@tensorflow-models/mobilenet';
@@ -15,21 +13,34 @@ function App() {
   const [isModelLoading, setIsModelLoading] = useState(false);
   const [model, setModel] = useState(null);
   const [results, setResults] = useState([]);
-  // const [text,setText] = useState('');
-  // const {speak} = useSpeechSynthesis();
+  const [text, setText] = useState('');
 
-  // const handleOnClick = () => {
-  //   speak({text:text})
+  function speak(text) {
+    const synth = window.speechSynthesis;
+    const utterance = new SpeechSynthesisUtterance(text);
+    synth.speak(utterance);
+  }
+  const handleOnClick = () => {
+    if (results && results.length) 
+  {
+    speak(results[0].className);
+  }
+  }
+
+  console.log(text && speak(text));
+
+  // if (results && results.length) 
+  // {
+  //   speak(results[0].className);
   // }
-
 
   // const toggle = () =>{
   //   setState(!state);
   // }
   const urlRef = useRef();
   const photoRef = useRef();
-  const videoRef = useRef();
-
+  const videoRef = useRef({});
+  const [srcObject,setSrcObject] = useState({});
   const loadModel = async () => {
     setIsModelLoading(true);
     try{
@@ -56,8 +67,16 @@ function App() {
         navigator.getUserMedia(
           {video: true}, 
           stream => {
+            // videoRef.current = {
+            //   ...videoRef.current,
+            //   srcObject : stream
+              
+            // }
+          setTimeout(() => {
             videoRef.current.srcObject = stream;
-            videoRef.current.addEventListener('loadeddata',resolve);
+            // videoRef.current.addEventListener('loadeddata',resolve);
+          },1000)
+            console.log(videoRef.current + ' loaded');
           },
           error => {reject(error);}
         );
@@ -76,7 +95,6 @@ function App() {
     let url = urlRef.current;
     photo.width = width;
     photo.height = height;
-
     let ctx = photo.getContext('2d');
     ctx.drawImage(video,0,0,photo.width,photo.height);
     let photoUrl = photo.toDataURL('image/png',1.5);
@@ -89,8 +107,7 @@ function App() {
     let photo = photoRef.current;
     let ctx = photo.getContext('2d');
     ctx.clearRect(0,0,photo.width,photo.height);
-    console.log('clearImage working');
-    // setHasPhoto(false);
+    console.log('clearImage working'); 
   };
   const identify = async () => {
     // textInputRef.current.value = ''
@@ -98,15 +115,6 @@ function App() {
     // console.log(results);
     setResults(results);
   }
-  const soundSrc = '';
-  const audio = (src) => {
-    const sound = new soundURL({
-      src,
-      html5: true
-    });
-    sound.play();
-  };
-
 
   useEffect(() =>{
     init();
@@ -148,6 +156,7 @@ function App() {
               ref={videoRef}
               className="webcam" 
               autoPlay
+              
             />
           </div>  
           <div className="controls">
@@ -165,7 +174,7 @@ function App() {
                 })}
           </div>}
           <div className="volume-data">
-            <i className='volume-icon'onClick={() => {}}><FaVolumeUp/></i>
+            <i className='volume-icon'onClick={() => {handleOnClick()}}><FaVolumeUp/></i>
           </div>
           <canvas ref={photoRef} src={urlRef}></canvas>
           {results.length > 0 && <div className='resultsHolder'>
