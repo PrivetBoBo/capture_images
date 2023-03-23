@@ -190,11 +190,11 @@ function App() {
         </div>
       </div>
 
-      <footer class="footer-distributed">
-      <div class="footer-left">
+      <footer className="footer-distributed">
+      <div className="footer-left">
           <h3>Website <span>Smile</span></h3>
 
-          <p class="footer-links">
+          <p className="footer-links">
               <a href="#">Trang chủ</a>
               |
               <a href="#">Thông tin</a>
@@ -202,31 +202,31 @@ function App() {
               <a href="#">Liên hệ</a>
           </p>
 
-          <p class="footer-company-name">Đề tài <b>Website học từ vựng tiếng Việt/tiếng Anh bằng cách quét ảnh</b></p>
+          <p className="footer-company-name">Đề tài <b>Website học từ vựng tiếng Việt/tiếng Anh bằng cách quét ảnh</b></p>
       </div>
 
-      <div class="footer-center">
+      <div className="footer-center">
           <div>
-              <i class="fa fa-map-marker"></i>
+              <i className="fa fa-map-marker"></i>
               <p><span>Đại học</span>
                   Thủy Lợi</p>
           </div>
 
           <div>
-              <i class="fa fa-phone"></i>
+              <i className="fa fa-phone"></i>
               <p>+91 **********</p>
           </div>
           <div>
-              <i class="fa fa-envelope"></i>
+              <i className="fa fa-envelope"></i>
               <p><a href="mailto:sagar00001.co@gmail.com">ducm*****@gmail.com</a></p>
           </div>
       </div>
-      <div class="footer-right">
-          <p class="footer-company-about">
+      <div className="footer-right">
+          <p className="footer-company-about">
               <span>Thông tin về nhóm</span>
              
           </p>
-          <div class="footer-icons">
+          <div className="footer-icons">
               <a href="#"><FaFacebook/></a>
               <a href="#"><FaTwitter/></a>
               <a href="#"><FaGithub/></a>
